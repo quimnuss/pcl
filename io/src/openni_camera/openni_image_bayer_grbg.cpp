@@ -314,6 +314,13 @@ openni_wrapper::ImageBayerGRBG::fillRGB (
   {
     const unsigned char* bayer_pixel = image_md_->Data ();
 
+    if(!bayer_pixel)
+    {
+        //THROW_OPENNI_EXCEPTION ("Openni returned an empty image_md_->Data()");
+        std::cout << "Openni returned an empty image_md_->Data()" << std::endl;
+        return;
+    }
+
     int bayer_line_step = image_md_->XRes ();
     int bayer_line_step2 = image_md_->XRes () << 1;
 
