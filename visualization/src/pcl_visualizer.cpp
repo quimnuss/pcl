@@ -51,6 +51,7 @@
 #include <vtkPolyDataNormals.h>
 #include <vtkMapper.h>
 #include <vtkDataSetMapper.h>
+#include <vtkRect.h>
 
 #if VTK_MAJOR_VERSION>=6 || (VTK_MAJOR_VERSION==5 && VTK_MINOR_VERSION>4)
 #include <vtkHardwareSelector.h>
@@ -2120,6 +2121,62 @@ pcl::visualization::PCLVisualizer::resetCameraViewpoint (const std::string &id)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl::visualization::PCLVisualizer::addAzimuth (const double& azimuth)
+{
+  // set all renderer to this viewpoint
+  rens_->InitTraversal ();
+  vtkRenderer* renderer = NULL;
+  while ((renderer = rens_->GetNextItem ()) != NULL)
+  {
+    vtkSmartPointer<vtkCamera> cam = renderer->GetActiveCamera ();
+    cam->Azimuth(azimuth);
+
+    //renderer->SetActiveCamera (cam);
+    //renderer->ResetCameraClippingRange ();
+  }
+  win_->Render ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl::visualization::PCLVisualizer::setFocalPoint (const double& x, const double& y, const double& z)
+{
+  // set all renderer to this viewpoint
+  rens_->InitTraversal ();
+  vtkRenderer* renderer = NULL;
+  while ((renderer = rens_->GetNextItem ()) != NULL)
+  {
+    vtkSmartPointer<vtkCamera> cam = renderer->GetActiveCamera ();
+    cam->SetFocalPoint(x,y,z);
+
+    renderer->SetActiveCamera (cam);
+    renderer->ResetCameraClippingRange ();
+  }
+  win_->Render ();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl::visualization::PCLVisualizer::setTest (const std::vector<double>& data)
+{
+  // set all renderer to this viewpoint
+  rens_->InitTraversal ();
+  vtkRenderer* renderer = NULL;
+  while ((renderer = rens_->GetNextItem ()) != NULL)
+  {
+    vtkSmartPointer<vtkCamera> cam = renderer->GetActiveCamera ();
+//    vtkRecti recti;
+//    cam->SetScissorRect(recti);
+
+    renderer->SetActiveCamera (cam);
+    renderer->ResetCameraClippingRange ();
+  }
+  win_->Render ();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
 bool
 pcl::visualization::PCLVisualizer::getCameraParameters (int argc, char **argv)
 {
@@ -2608,6 +2665,47 @@ pcl::visualization::PCLVisualizer::createViewPort (double xmin, double ymin, dou
 
   win_->AddRenderer (ren);
   win_->Modified ();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl::visualization::PCLVisualizer::removeViewPort (int &viewport)
+{
+    rens_->InitTraversal ();
+    vtkRenderer* renderer = NULL;
+    int i = 0;
+    while ((renderer = rens_->GetNextItem ()) != NULL)
+    {
+      if (viewport == i)               // add the actor only to the specified viewport
+      {
+        //sets renderer to renderer[viewport]
+          win_->RemoveRenderer(renderer);
+
+          rens_->RemoveItem(renderer);
+
+          if (rens_->GetNumberOfItems () <= 1)          // If only one renderer left
+            viewport = 0;                               // set viewport to 'all'
+          else
+            viewport = rens_->GetNumberOfItems () - 1;
+
+          win_->Modified ();
+          break;
+      }
+      ++i;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+void
+pcl::visualization::PCLVisualizer::resizeViewPort (double xmin, double ymin, double xmax, double ymax)
+{
+    rens_->InitTraversal ();
+    vtkRenderer* ren = NULL;
+    while ((ren = rens_->GetNextItem ()) != NULL)
+    {
+        ren->SetViewport (xmin, ymin, xmax, ymax);
+    }
+    win_->Modified ();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

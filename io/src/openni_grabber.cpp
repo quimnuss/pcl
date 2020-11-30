@@ -494,21 +494,30 @@ void
 pcl::OpenNIGrabber::imageDepthImageCallback (const boost::shared_ptr<openni_wrapper::Image> &image,
                                              const boost::shared_ptr<openni_wrapper::DepthImage> &depth_image)
 {
-  // check if we have color point cloud slots
-  if (point_cloud_rgb_signal_->num_slots () > 0)
-  {
-    PCL_WARN ("PointXYZRGB callbacks deprecated. Use PointXYZRGBA instead.\n");
-    point_cloud_rgb_signal_->operator()(convertToXYZRGBPointCloud<pcl::PointXYZRGB> (image, depth_image));
-  }
+    try
+    {
+      // check if we have color point cloud slots
+      if (point_cloud_rgb_signal_->num_slots () > 0)
+      {
+        PCL_WARN ("PointXYZRGB callbacks deprecated. Use PointXYZRGBA instead.\n");
+        point_cloud_rgb_signal_->operator()(convertToXYZRGBPointCloud<pcl::PointXYZRGB> (image, depth_image));
+      }
 
-  if (point_cloud_rgba_signal_->num_slots () > 0)
-    point_cloud_rgba_signal_->operator()(convertToXYZRGBPointCloud<pcl::PointXYZRGBA> (image, depth_image));
+      if (point_cloud_rgba_signal_->num_slots () > 0)
+        point_cloud_rgba_signal_->operator()(convertToXYZRGBPointCloud<pcl::PointXYZRGBA> (image, depth_image));
 
-  if (image_depth_image_signal_->num_slots () > 0)
-  {
-    float constant = 1.0f / device_->getDepthFocalLength (depth_width_);
-    image_depth_image_signal_->operator()(image, depth_image, constant);
-  }
+      if (image_depth_image_signal_->num_slots () > 0)
+      {
+        float constant = 1.0f / device_->getDepthFocalLength (depth_width_);
+        image_depth_image_signal_->operator()(image, depth_image, constant);
+      }
+    }
+    catch(const openni_wrapper::OpenNIException& exp)
+    {
+        std::cout << "Caught " << exp.what() << " @" << exp.getFileName()
+                  << ":" << exp.getFunctionName() << ":" << exp.getLineNumber() << std::endl;
+
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -702,6 +711,7 @@ pcl::OpenNIGrabber::convertToXYZRGBPointCloud (const boost::shared_ptr<openni_wr
   value_idx = 0;
   point_idx = 0;
 
+  //we don't use color
   for (unsigned yIdx = 0; yIdx < image_height_; ++yIdx, point_idx += skip)
   {
     for (unsigned xIdx = 0; xIdx < image_width_; ++xIdx, point_idx += step, value_idx += 3)

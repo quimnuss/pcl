@@ -1239,6 +1239,13 @@ namespace pcl
         void
         createViewPort (double xmin, double ymin, double xmax, double ymax, int &viewport);
 
+        void
+        removeViewPort(int& viewport);
+
+        void
+        resizeViewPort (double xmin, double ymin, double xmax, double ymax);
+
+
         /** \brief Create a new separate camera for the given viewport.
           * \param[in] viewport the viewport to create a new camera for.
           */
@@ -1739,6 +1746,15 @@ namespace pcl
           */
         void
         resetCameraViewpoint (const std::string &id = "cloud");
+
+        void
+        addAzimuth (const double& azimuth);
+
+        void
+        setFocalPoint (const double& x, const double& y, const double& z);
+
+        void
+        setTest (const std::vector<double>& data);
 
         /** \brief Set the camera pose given by position, viewpoint and up vector
           * \param[in] pos_x the x coordinate of the camera location
