@@ -138,7 +138,7 @@ pcl::OpenNIGrabber::~OpenNIGrabber () noexcept
 
     // release the pointer to the device object
     device_.reset ();
-    
+
     // disconnect all listeners
     disconnect_all_slots<sig_cb_openni_image> ();
     disconnect_all_slots<sig_cb_openni_depth_image> ();
@@ -398,7 +398,7 @@ pcl::OpenNIGrabber::setupDevice (const std::string& device_id, const Mode& depth
 
   depth_width_ = depth_md.nXRes;
   depth_height_ = depth_md.nYRes;
-  
+
   if (device_->hasImageStream ())
   {
     XnMapOutputMode image_md;
@@ -509,7 +509,7 @@ pcl::OpenNIGrabber::imageDepthImageCallback (const openni_wrapper::Image::Ptr &i
       // check if we have color point cloud slots
       if (point_cloud_rgb_signal_->num_slots () > 0)
       {
-        PCL_WARN ("PointXYZRGB callbacks deprecated. Use PointXYZRGBA instead.\n");
+        // PCL_WARN ("PointXYZRGB callbacks deprecated. Use PointXYZRGBA instead.\n");
         point_cloud_rgb_signal_->operator()(convertToXYZRGBPointCloud<pcl::PointXYZRGB> (image, depth_image));
       }
 
@@ -568,10 +568,10 @@ pcl::OpenNIGrabber::convertToXYZPointCloud (const openni_wrapper::DepthImage::Pt
 
   if (std::isfinite (depth_focal_length_y_))
     constant_y =  1.0f / static_cast<float> (depth_focal_length_y_);
-  
+
   if (std::isfinite (depth_principal_point_x_))
     centerX =  static_cast<float> (depth_principal_point_x_);
-  
+
   if (std::isfinite (depth_principal_point_y_))
     centerY =  static_cast<float> (depth_principal_point_y_);
 
@@ -645,10 +645,10 @@ pcl::OpenNIGrabber::convertToXYZRGBPointCloud (const openni_wrapper::Image::Ptr 
 
   if (std::isfinite (depth_focal_length_y_))
     constant_y =  1.0f / static_cast<float> (depth_focal_length_y_);
-  
+
   if (std::isfinite (depth_principal_point_x_))
     centerX =  static_cast<float> (depth_principal_point_x_);
-  
+
   if (std::isfinite (depth_principal_point_y_))
     centerY =  static_cast<float> (depth_principal_point_y_);
 
@@ -675,7 +675,7 @@ pcl::OpenNIGrabber::convertToXYZRGBPointCloud (const openni_wrapper::Image::Ptr 
   image->fillRGB (image_width_, image_height_, rgb_buffer, image_width_ * 3);
   float bad_point = std::numeric_limits<float>::quiet_NaN ();
 
-  // set xyz to Nan and rgb to 0 (black)  
+  // set xyz to Nan and rgb to 0 (black)
   if (image_width_ != depth_width_)
   {
     PointT pt;
@@ -684,11 +684,11 @@ pcl::OpenNIGrabber::convertToXYZRGBPointCloud (const openni_wrapper::Image::Ptr 
     pt.a = 0; // point has no color info -> alpha = min => transparent
     cloud->points.assign (cloud->size (), pt);
   }
-  
+
   // fill in XYZ values
   unsigned step = cloud->width / depth_width_;
   unsigned skip = cloud->width * step - cloud->width;
-  
+
   int value_idx = 0;
   int point_idx = 0;
   for (unsigned int v = 0; v < depth_height_; ++v, point_idx += skip)
@@ -717,7 +717,7 @@ pcl::OpenNIGrabber::convertToXYZRGBPointCloud (const openni_wrapper::Image::Ptr 
   // fill in the RGB values
   step = cloud->width / image_width_;
   skip = cloud->width * step - cloud->width;
-  
+
   value_idx = 0;
   point_idx = 0;
 
@@ -727,7 +727,7 @@ pcl::OpenNIGrabber::convertToXYZRGBPointCloud (const openni_wrapper::Image::Ptr 
     for (unsigned xIdx = 0; xIdx < image_width_; ++xIdx, point_idx += step, value_idx += 3)
     {
       PointT& pt = (*cloud)[point_idx];
-      
+
       pt.r = rgb_buffer[value_idx];
       pt.g = rgb_buffer[value_idx + 1];
       pt.b = rgb_buffer[value_idx + 2];
@@ -764,7 +764,7 @@ pcl::OpenNIGrabber::convertToXYZIPointCloud (const openni_wrapper::IRImage::Ptr 
 
   if (std::isfinite (rgb_principal_point_x_))
     centerX = static_cast<float>(rgb_principal_point_x_);
-  
+
   if (std::isfinite (rgb_principal_point_y_))
     centerY = static_cast<float>(rgb_principal_point_y_);
 
